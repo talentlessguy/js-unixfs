@@ -8,7 +8,7 @@ import type {
   Block as IPLDBlock,
   BlockView as IPLDBlockView
 } from "multiformats"
-import { Data as IData, Data_DataType} from "../gen/unixfs_pb"
+import { Data as IData, Data_DataType} from "../gen/unixfs_pb.js"
 export type { MultihashHasher, MultibaseEncoder, MultihashDigest, BlockEncoder }
 export * as Layout from "./file/layout/api"
 
@@ -314,7 +314,7 @@ export interface UnixTime {
    * fractional part of the mtime as the amount of nanoseconds. The valid
    * range for this value are the integers [1, 999999999].
    */
-  readonly FractionalNanoseconds?: bigint
+  readonly FractionalNanoseconds?: number
 }
 
 /**
@@ -348,7 +348,7 @@ export type Mode = uint32
  */
 export interface MTime {
   readonly secs: bigint
-  readonly nsecs?: bigint
+  readonly nsecs?: number
 }
 
 /**

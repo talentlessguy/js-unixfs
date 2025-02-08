@@ -6,5 +6,5 @@
  * @see https://github.com/microsoft/TypeScript/issues/41825
  */
 
-import { Data_DataType } from "../gen/unixfs_pb"
+import { Data_DataType } from "../gen/unixfs_pb.js"
 export const NodeType = Data_DataType

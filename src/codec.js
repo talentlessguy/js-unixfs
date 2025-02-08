@@ -1,8 +1,8 @@
 import * as PB from "@ipld/dag-pb"
 import * as UnixFS from "./unixfs.js"
 import { NodeType } from "./unixfs.js"
-import { DataSchema, UnixTimeSchema } from "../gen/unixfs_pb.js"
-import { fromBinary, toBinary , toJson } from '@bufbuild/protobuf'
+import { DataSchema } from "../gen/unixfs_pb.js"
+import { fromBinary, toBinary } from '@bufbuild/protobuf'
 
 export * from "./unixfs.js"
 
@@ -169,7 +169,6 @@ export const encodeRaw = content =>
   encodePB(
     {
       Type: NodeType.Raw,
-      // @ts-expect-error does not accept undefined
       Data: content.byteLength > 0 ? content : undefined,
       filesize: BigInt(content.byteLength),
       // @ts-ignore
@@ -212,6 +211,7 @@ export const encodeFileChunk = content => encodeSimpleFile(content, BLANK)
 export const encodeFileShard = parts =>
   encodePB(
     {
+      $typeName: 'Data',
       Type: NodeType.File,
       blocksizes: parts.map(contentByteLength),
       filesize: BigInt(cumulativeContentByteLength(parts)),
@@ -227,10 +227,10 @@ export const encodeFileShard = parts =>
 export const encodeAdvancedFile = (parts, metadata = BLANK) =>
   encodePB(
     {
+      $typeName: 'Data',
       Type: NodeType.File,
       blocksizes: parts.map(contentByteLength),
-      filesize: cumulativeContentByteLength(parts),
-
+      filesize: BigInt(cumulativeContentByteLength(parts)),
       ...encodeMetadata(metadata),
     },
     parts.map(encodeLink)
@@ -256,6 +256,7 @@ export const encodeLink = dag => ({
 export const encodeSimpleFile = (content, metadata = BLANK) =>
   encodePB(
     {
+      $typeName: 'Data',
       Type: NodeType.File,
       // adding empty file to both go-ipfs and js-ipfs produces block in
       // which `Data` is omitted but filesize and blocksizes are present.
@@ -294,6 +295,7 @@ export const encodeComplexFile = (content, parts, metadata = BLANK) =>
 export const encodeDirectory = node =>
   encodePB(
     {
+      $typeName: 'Data',
       Type: node.type,
       ...encodeDirectoryMetadata(node.metadata || BLANK),
     },
@@ -313,8 +315,8 @@ export const encodeHAMTShard = ({
 }) =>
   encodePB(
     {
+      $typeName: 'Data',
       Type: NodeType.HAMTShard,
-      // @ts-expect-error does not accept undefined
       Data: bitfield.byteLength > 0 ? bitfield : undefined,
       fanout: BigInt(readFanout(fanout)),
       hashType: BigInt(readInt(hashType)),
@@ -381,6 +383,7 @@ export const encodeSymlink = (node, ignoreMetadata = false) => {
   // @see https://github.com/ipfs/js-ipfs-unixfs/issues/195
   return encodePB(
     {
+      $typeName: 'Data',
       Type: NodeType.Symlink,
       Data: node.content,
       ...encodeMetadata(metadata || BLANK),
@@ -424,7 +427,6 @@ export const decode = bytes => {
   
   const metadata = {
     ...(mode && { mode }),
-    // @ts-expect-error cannot be undefined
     ...decodeMtime(mtime),
   }
   /** @type {UnixFS.PBLink[]} */
@@ -432,19 +434,19 @@ export const decode = bytes => {
 
   switch (message.Type) {
     case NodeType.Raw:
-      return createRaw(data)
+      return createRaw(/** @type {Uint8Array} */ (data))
     case NodeType.File:
       if (links.length === 0) {
-        return new SimpleFileView(data, metadata)
-      } else if (data.byteLength === 0) {
+        return new SimpleFileView(/** @type {Uint8Array} */ (data), metadata)
+      } else if ((/** @type {Uint8Array} */ (data)).byteLength === 0) {
         return new AdvancedFileView(
-          decodeFileLinks(blocksizes, links),
+          decodeFileLinks(/** @type {bigint[]} */ (blocksizes), links),
           metadata
         )
       } else {
         return new ComplexFileView(
-          data,
-          decodeFileLinks(blocksizes, links),
+          /** @type {Uint8Array} */ (data),
+          decodeFileLinks(/** @type {bigint[]} */ (blocksizes), links),
           metadata
         )
       }
@@ -454,12 +456,12 @@ export const decode = bytes => {
       return createShardedDirectory(
         decodeDirectoryLinks(links),
         data || EMPTY_BUFFER,
-       Number( BigInt.asUintN(64, rest.fanout)),
-        Number( BigInt.asUintN(64, rest.hashType)),
+       Number( BigInt.asUintN(64, rest.fanout || 0n)),
+        Number( BigInt.asUintN(64, rest.hashType || 0n)),
         metadata
       )
     case NodeType.Symlink:
-      return createSymlink(data, metadata)
+      return createSymlink((/** @type {Uint8Array} */ (data)), metadata)
     default:
       throw new TypeError(`Unsupported node type ${message.Type}`)
   }
@@ -467,12 +469,13 @@ export const decode = bytes => {
 
 /**
  * @param {UnixFS.UnixTime|undefined} mtime
+ * @returns {{mtime?: UnixFS.MTime}|undefined}
  */
 const decodeMtime = mtime =>
   mtime == null
     ? undefined
     : {
-        mtime: { secs: mtime.Seconds, nsecs: mtime.FractionalNanoseconds || 0n },
+        mtime: { secs: mtime.Seconds, nsecs: mtime.FractionalNanoseconds },
       }
 
 /**
@@ -587,13 +590,15 @@ export const decodeMetadata = data =>
 
 /**
  * @param {UnixFS.MTime} mtime
+ * @returns {import("../gen/unixfs_pb.js").UnixTime | undefined}
  */
 const encodeMTime = mtime => {
+  
   return mtime == null
     ? undefined
     : mtime.nsecs !== 0
-    ? { Seconds: mtime.secs, FractionalNanoseconds: mtime.nsecs }
-    : { Seconds: mtime.secs }
+    ? { Seconds: mtime.secs, FractionalNanoseconds: mtime.nsecs, $typeName: 'UnixTime' }
+    : { Seconds: mtime.secs, $typeName: 'UnixTime' }
 }
 
 /**

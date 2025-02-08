@@ -3,6 +3,7 @@ import * as unixfs from "../src/codec.js"
 import { assert } from "chai"
 import * as blocks from "./fixtures.js"
 import { fetch } from "./util.js"
+import { describe, it } from 'node:test'
 
 const utf8 = new TextEncoder()
 const MURMUR = 0x22
@@ -180,7 +181,7 @@ describe("unixfs-format", () => {
 
   it("mtime", () => {
     const mtime = {
-      secs: 5,
+      secs: 5n,
       nsecs: 0,
     }
     const block = unixfs.encode({
@@ -193,7 +194,7 @@ describe("unixfs-format", () => {
     assert.deepEqual(unixfs.decode(block), {
       type: unixfs.NodeType.File,
       layout: "simple",
-      metadata: { mtime: { secs: 5, nsecs: 0 } },
+      metadata: { mtime: { secs: 5n, nsecs: 0 } },
       content: utf8Encode("mtime"),
     })
   })
@@ -202,14 +203,14 @@ describe("unixfs-format", () => {
     const block = unixfs.encode({
       type: unixfs.NodeType.File,
       layout: "simple",
-      metadata: { mtime: { secs: 5 } },
+      metadata: { mtime: { secs: 5n } },
       content: utf8Encode("mtime"),
     })
 
     assert.deepEqual(unixfs.decode(block), {
       type: unixfs.NodeType.File,
       layout: "simple",
-      metadata: { mtime: { secs: 5, nsecs: 0 } },
+      metadata: { mtime: { secs: 5n, nsecs: 0 } },
       content: utf8Encode("mtime"),
     })
   })
@@ -297,7 +298,7 @@ describe("unixfs-format", () => {
       content: utf8Encode("file.txt"),
       metadata: {
         mtime: {
-          secs: 5,
+          secs: 5n,
         },
       },
     })
@@ -307,7 +308,7 @@ describe("unixfs-format", () => {
       content: utf8Encode("file.txt"),
       metadata: {
         mtime: {
-          secs: 5,
+          secs: 5n,
           nsecs: 0,
         },
       },
@@ -320,7 +321,7 @@ describe("unixfs-format", () => {
       content: utf8Encode("file.txt"),
       metadata: {
         mtime: {
-          secs: 5,
+          secs: 5n,
           nsecs: 7,
         },
       },
@@ -331,7 +332,7 @@ describe("unixfs-format", () => {
       content: utf8Encode("file.txt"),
       metadata: {
         mtime: {
-          secs: 5,
+          secs: 5n,
           nsecs: 7,
         },
       },

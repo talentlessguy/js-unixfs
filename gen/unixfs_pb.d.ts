@@ -22,32 +22,32 @@ export declare type Data = Message<"Data"> & {
   /**
    * @generated from field: optional bytes Data = 2;
    */
-  Data: Uint8Array;
+  Data?: Uint8Array;
 
   /**
    * @generated from field: optional uint64 filesize = 3;
    */
-  filesize: bigint;
+  filesize?: bigint;
 
   /**
    * @generated from field: repeated uint64 blocksizes = 4;
    */
-  blocksizes: bigint[];
+  blocksizes?: bigint[];
 
   /**
    * @generated from field: optional uint64 hashType = 5;
    */
-  hashType: bigint;
+  hashType?: bigint;
 
   /**
    * @generated from field: optional uint64 fanout = 6;
    */
-  fanout: bigint;
+  fanout?: bigint;
 
   /**
    * @generated from field: optional uint32 mode = 7;
    */
-  mode: number;
+  mode?: number;
 
   /**
    * @generated from field: optional UnixTime mtime = 8;
@@ -113,7 +113,7 @@ export declare type UnixTime = Message<"UnixTime"> & {
   /**
    * @generated from field: optional fixed32 FractionalNanoseconds = 2;
    */
-  FractionalNanoseconds: number;
+  FractionalNanoseconds?: number;
 };
 
 /**

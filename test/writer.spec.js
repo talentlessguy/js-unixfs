@@ -1,3 +1,4 @@
+import { describe, it } from "node:test"
 import * as Writer from "../src/file/writer.js"
 import * as UnixFS from "../src/lib.js"
 import { TransformStream } from "@web-std/stream"
