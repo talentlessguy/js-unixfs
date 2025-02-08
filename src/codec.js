@@ -221,6 +221,9 @@ export const encodeFileShard = parts =>
       Type: NodeType.File,
       blocksizes: parts.map(contentByteLength),
       filesize: BigInt(cumulativeContentByteLength(parts)),
+      hashType: 0n,
+      fanout: 0n,
+      
     },
     parts.map(encodeLink)
   )
@@ -239,6 +242,9 @@ export const encodeAdvancedFile = (parts, metadata = BLANK) =>
       blocksizes: parts.map(contentByteLength),
       filesize: BigInt(cumulativeContentByteLength(parts)),
       ...encodeMetadata(metadata),
+      hashType: 0n,
+      fanout: 0n,
+      
     },
     parts.map(encodeLink)
   )
@@ -272,6 +278,9 @@ export const encodeSimpleFile = (content, metadata = BLANK) =>
       filesize: BigInt(content.byteLength),
       blocksizes: [],
       ...encodeMetadata(metadata),
+      hashType: 0n,
+      fanout: 0n,
+      
     },
     []
   )
@@ -291,6 +300,9 @@ export const encodeComplexFile = (content, parts, metadata = BLANK) =>
       Data: content,
       filesize: BigInt(content.byteLength + cumulativeContentByteLength(parts)),
       blocksizes: parts.map(contentByteLength),
+      hashType: 0n,
+      fanout: 0n,
+      
     },
     parts.map(encodeLink)
   )
@@ -307,6 +319,10 @@ export const encodeDirectory = node =>
       Type: node.type,
       blocksizes: [],
       ...encodeDirectoryMetadata(node.metadata || BLANK),
+      hashType: 0n,
+      fanout: 0n,
+      
+      filesize: 0n,
     },
     node.entries.map(encodeNamedLink)
   )
@@ -329,7 +345,8 @@ export const encodeHAMTShard = ({
       Data: bitfield.byteLength > 0 ? bitfield : EMPTY_BUFFER,
       fanout: BigInt(readFanout(fanout)),
       hashType: BigInt(readInt(hashType)),
-
+      filesize: 0n,  
+      blocksizes: [],
       ...encodeDirectoryMetadata(metadata),
     },
     entries.map(encodeNamedLink)
@@ -584,7 +601,7 @@ export const encodeMetadata = (
   { mode, mtime },
   defaultMode = DEFAULT_FILE_MODE
 ) => ({
-  mode: mode != null ? encodeMode(mode, defaultMode) : undefined,
+  mode: mode != null ? encodeMode(mode, defaultMode) : 0,
   mtime: mtime != null ? encodeMTime(mtime) : undefined,
 })
 

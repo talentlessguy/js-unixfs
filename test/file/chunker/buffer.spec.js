@@ -1,6 +1,7 @@
 /* eslint-env mocha */
 import { expect, assert } from "chai"
 import * as BufferQueue from "../../../src/file/chunker/buffer.js"
+import { describe, it } from "node:test"
 
 describe("chunker buffer", () => {
   it("concat two uint8arrays", () => {
