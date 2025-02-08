@@ -24,6 +24,10 @@ export const name = "UnixFS"
 const encodePB = (data, links) => {
   Object(globalThis).debug && console.log({ data, links })
 
+  if (data.blocksizes == null) {
+    data.blocksizes = []
+  }
+
   return PB.encode(
     // We run through prepare as links need to be sorted by name which it will
     // do.
@@ -168,8 +172,9 @@ export const createDirectoryShard = (entries, bitfield, fanout, hashType) => ({
 export const encodeRaw = content =>
   encodePB(
     {
+      $typeName: 'Data',
       Type: NodeType.Raw,
-      Data: content.byteLength > 0 ? content : undefined,
+      Data: content.byteLength > 0 ? content : EMPTY_BUFFER,
       filesize: BigInt(content.byteLength),
       // @ts-ignore
       blocksizes: EMPTY,
@@ -212,6 +217,7 @@ export const encodeFileShard = parts =>
   encodePB(
     {
       $typeName: 'Data',
+      Data: EMPTY_BUFFER,
       Type: NodeType.File,
       blocksizes: parts.map(contentByteLength),
       filesize: BigInt(cumulativeContentByteLength(parts)),
@@ -228,6 +234,7 @@ export const encodeAdvancedFile = (parts, metadata = BLANK) =>
   encodePB(
     {
       $typeName: 'Data',
+      Data: EMPTY_BUFFER,
       Type: NodeType.File,
       blocksizes: parts.map(contentByteLength),
       filesize: BigInt(cumulativeContentByteLength(parts)),
@@ -261,7 +268,7 @@ export const encodeSimpleFile = (content, metadata = BLANK) =>
       // adding empty file to both go-ipfs and js-ipfs produces block in
       // which `Data` is omitted but filesize and blocksizes are present.
       // For the sake of hash consistency we do the same.
-      Data: content.byteLength > 0 ? content : undefined,
+      Data: content.byteLength > 0 ? content : EMPTY_BUFFER,
       filesize: BigInt(content.byteLength),
       blocksizes: [],
       ...encodeMetadata(metadata),
@@ -296,6 +303,7 @@ export const encodeDirectory = node =>
   encodePB(
     {
       $typeName: 'Data',
+      Data: EMPTY_BUFFER,
       Type: node.type,
       blocksizes: [],
       ...encodeDirectoryMetadata(node.metadata || BLANK),
@@ -318,7 +326,7 @@ export const encodeHAMTShard = ({
     {
       $typeName: 'Data',
       Type: NodeType.HAMTShard,
-      Data: bitfield.byteLength > 0 ? bitfield : undefined,
+      Data: bitfield.byteLength > 0 ? bitfield : EMPTY_BUFFER,
       fanout: BigInt(readFanout(fanout)),
       hashType: BigInt(readInt(hashType)),
 

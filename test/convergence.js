@@ -2,7 +2,7 @@ import { assert } from "chai"
 import Matrix from "./dataset/convergence_rawdata.js"
 import * as UnixFS from "../src/lib.js"
 import { parseConfig, unpackFile } from "./matrix.js"
-import { Link, collect, iterate, encodeCar, writeFile } from "./util.js"
+import { iterate, encodeCar, writeFile } from "./util.js"
 import { TransformStream } from "@web-std/stream"
 import { describe, it } from "node:test"
 

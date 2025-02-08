@@ -2,6 +2,7 @@
 import { assert } from "chai"
 import * as Balanced from "../../../src/file/layout/balanced.js"
 import * as Slice from "../../../src/file/chunker/buffer.js"
+import { describe, it } from "node:test"
 
 describe("balanced layout", () => {
   it("empty produces empty leaf node", () => {
