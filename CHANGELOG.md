@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.0.0](https://github.com/ipld/js-unixfs/compare/v2.2.0...v3.0.0) (2024-01-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade multiformats
+
+### Features
+
+* upgrade multiformats ([e6d772d](https://github.com/ipld/js-unixfs/commit/e6d772d2544635f538d835847026e9db67e5c0df))
+
+## [2.2.0](https://github.com/ipld/js-unixfs/compare/v2.1.2...v2.2.0) (2024-01-16)
+
+
+### Features
+
+* move to native web streams ([#56](https://github.com/ipld/js-unixfs/issues/56)) ([23dd7e1](https://github.com/ipld/js-unixfs/commit/23dd7e186edc83bd86aae61b089abbc3a53070d9))
+
 ## [2.1.2](https://github.com/ipld/js-unixfs/compare/v2.1.1...v2.1.2) (2023-09-08)
 
 

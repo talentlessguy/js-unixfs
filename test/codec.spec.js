@@ -2,7 +2,6 @@
 import * as unixfs from "../src/codec.js"
 import { assert } from "chai"
 import * as blocks from "./fixtures.js"
-import { fetch } from "./util.js"
 import { describe, it } from 'node:test'
 
 const utf8 = new TextEncoder()
