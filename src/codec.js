@@ -28,7 +28,7 @@ const encodePB = (data, links) => {
     // We run through prepare as links need to be sorted by name which it will
     // do.
     PB.prepare({
-      Data: toBinary(DataSchema, data),
+      Data: data.Data ? toBinary(DataSchema, data) : undefined,
       // We can cast to mutable array as we know no mutation occurs there
       Links:
         /** @type {PB.PBLink[]} */ (links),
@@ -297,6 +297,7 @@ export const encodeDirectory = node =>
     {
       $typeName: 'Data',
       Type: node.type,
+      blocksizes: [],
       ...encodeDirectoryMetadata(node.metadata || BLANK),
     },
     node.entries.map(encodeNamedLink)
@@ -387,6 +388,8 @@ export const encodeSymlink = (node, ignoreMetadata = false) => {
       Type: NodeType.Symlink,
       Data: node.content,
       ...encodeMetadata(metadata || BLANK),
+      filesize: BigInt(node.content.byteLength),
+      blocksizes: [],
     },
     []
   )

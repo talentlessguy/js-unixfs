@@ -4,7 +4,7 @@ import * as UnixFS from "../src/lib.js"
 import { parseConfig, unpackFile } from "./matrix.js"
 import { Link, collect, iterate, encodeCar, writeFile } from "./util.js"
 import { TransformStream } from "@web-std/stream"
-import { describe } from "node:test"
+import { describe, it } from "node:test"
 
 /**
  *
