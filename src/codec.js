@@ -1,7 +1,8 @@
 import * as PB from "@ipld/dag-pb"
 import * as UnixFS from "./unixfs.js"
 import { NodeType } from "./unixfs.js"
-import { Data } from "../gen/unixfs.js"
+import { DataSchema, UnixTimeSchema } from "../gen/unixfs_pb.js"
+import { fromBinary, toBinary , toJson } from '@bufbuild/protobuf'
 
 export * from "./unixfs.js"
 
@@ -27,7 +28,7 @@ const encodePB = (data, links) => {
     // We run through prepare as links need to be sorted by name which it will
     // do.
     PB.prepare({
-      Data: Data.encode(data).finish(),
+      Data: toBinary(DataSchema, data),
       // We can cast to mutable array as we know no mutation occurs there
       Links:
         /** @type {PB.PBLink[]} */ (links),
@@ -168,9 +169,9 @@ export const encodeRaw = content =>
   encodePB(
     {
       Type: NodeType.Raw,
-      // TODO:
+      // @ts-expect-error does not accept undefined
       Data: content.byteLength > 0 ? content : undefined,
-      filesize: content.byteLength,
+      filesize: BigInt(content.byteLength),
       // @ts-ignore
       blocksizes: EMPTY,
     },
@@ -213,7 +214,7 @@ export const encodeFileShard = parts =>
     {
       Type: NodeType.File,
       blocksizes: parts.map(contentByteLength),
-      filesize: cumulativeContentByteLength(parts),
+      filesize: BigInt(cumulativeContentByteLength(parts)),
     },
     parts.map(encodeLink)
   )
@@ -260,7 +261,7 @@ export const encodeSimpleFile = (content, metadata = BLANK) =>
       // which `Data` is omitted but filesize and blocksizes are present.
       // For the sake of hash consistency we do the same.
       Data: content.byteLength > 0 ? content : undefined,
-      filesize: content.byteLength,
+      filesize: BigInt(content.byteLength),
       blocksizes: [],
       ...encodeMetadata(metadata),
     },
@@ -277,9 +278,10 @@ export const encodeSimpleFile = (content, metadata = BLANK) =>
 export const encodeComplexFile = (content, parts, metadata = BLANK) =>
   encodePB(
     {
+      $typeName:'Data',
       Type: NodeType.File,
       Data: content,
-      filesize: content.byteLength + cumulativeContentByteLength(parts),
+      filesize: BigInt(content.byteLength + cumulativeContentByteLength(parts)),
       blocksizes: parts.map(contentByteLength),
     },
     parts.map(encodeLink)
@@ -312,9 +314,10 @@ export const encodeHAMTShard = ({
   encodePB(
     {
       Type: NodeType.HAMTShard,
+      // @ts-expect-error does not accept undefined
       Data: bitfield.byteLength > 0 ? bitfield : undefined,
-      fanout: readFanout(fanout),
-      hashType: readInt(hashType),
+      fanout: BigInt(readFanout(fanout)),
+      hashType: BigInt(readInt(hashType)),
 
       ...encodeDirectoryMetadata(metadata),
     },
@@ -414,23 +417,14 @@ export const encode = (node, root = true) => {
  */
 export const decode = bytes => {
   const pb = PB.decode(bytes)
-  const message = Data.decode(/** @type {Uint8Array} */ (pb.Data))
+  // @ts-expect-error data cannot be undefined
+  const message = fromBinary(DataSchema, pb.Data)
 
-  const {
-    Type: type,
-    Data: data,
-    mtime,
-    mode,
-    blocksizes,
-    ...rest
-  } = Data.toObject(message, {
-    defaults: false,
-    arrays: true,
-    longs: Number,
-    objects: false,
-  })
+  const { Type: type, Data: data, mtime, mode, blocksizes, ...rest } = message
+  
   const metadata = {
     ...(mode && { mode }),
+    // @ts-expect-error cannot be undefined
     ...decodeMtime(mtime),
   }
   /** @type {UnixFS.PBLink[]} */
@@ -444,13 +438,13 @@ export const decode = bytes => {
         return new SimpleFileView(data, metadata)
       } else if (data.byteLength === 0) {
         return new AdvancedFileView(
-          decodeFileLinks(rest.blocksizes, links),
+          decodeFileLinks(blocksizes, links),
           metadata
         )
       } else {
         return new ComplexFileView(
           data,
-          decodeFileLinks(rest.blocksizes, links),
+          decodeFileLinks(blocksizes, links),
           metadata
         )
       }
@@ -460,8 +454,8 @@ export const decode = bytes => {
       return createShardedDirectory(
         decodeDirectoryLinks(links),
         data || EMPTY_BUFFER,
-        rest.fanout,
-        rest.hashType,
+       Number( BigInt.asUintN(64, rest.fanout)),
+        Number( BigInt.asUintN(64, rest.hashType)),
         metadata
       )
     case NodeType.Symlink:
@@ -478,7 +472,7 @@ const decodeMtime = mtime =>
   mtime == null
     ? undefined
     : {
-        mtime: { secs: mtime.Seconds, nsecs: mtime.FractionalNanoseconds || 0 },
+        mtime: { secs: mtime.Seconds, nsecs: mtime.FractionalNanoseconds || 0n },
       }
 
 /**
@@ -496,7 +490,7 @@ const decodeBlocksizes = (type, blocksizes) => {
 
 /**
  *
- * @param {number[]} blocksizes
+ * @param {bigint[]} blocksizes
  * @param {UnixFS.PBLink[]} links
  * @returns {UnixFS.FileLink[]}
  */
@@ -510,7 +504,7 @@ const decodeFileLinks = (blocksizes, links) => {
       /** @type {UnixFS.FileLink} */ ({
         cid: links[n].Hash,
         dagByteLength: links[n].Tsize || 0,
-        contentByteLength: blocksizes[n],
+        contentByteLength: Number(BigInt.asUintN(64, blocksizes[n])),
       })
     )
   }
@@ -550,7 +544,7 @@ export const cumulativeDagByteLength = (root, links) =>
  *
  * @param {UnixFS.FileLink} link
  */
-const contentByteLength = link => link.contentByteLength
+const contentByteLength = link => BigInt(link.contentByteLength)
 
 /**
  * @param {UnixFS.NamedDAGLink<unknown>} link
