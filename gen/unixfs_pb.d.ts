@@ -108,12 +108,12 @@ export declare type UnixTime = Message<"UnixTime"> & {
   /**
    * @generated from field: int64 seconds = 1;
    */
-  seconds: bigint;
+  Seconds: bigint;
 
   /**
    * @generated from field: fixed32 fractional_nanoseconds = 2;
    */
-  fractionalNanoseconds: number;
+  FractionalNanoseconds: number;
 };
 
 /**

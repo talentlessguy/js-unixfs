@@ -272,12 +272,11 @@ export const encodeSimpleFile = (content, metadata = BLANK) =>
       // which `Data` is omitted but filesize and blocksizes are present.
       // For the sake of hash consistency we do the same.
       Data: content.byteLength > 0 ? content : EMPTY_BUFFER,
-      filesize: BigInt(content.byteLength),
+      filesize: content.byteLength === 0 ? undefined : BigInt(content.byteLength),
       blocksizes: [],
       ...encodeMetadata(metadata),
       hashType: 0n,
       fanout: 0n,
-      
     },
     []
   )
@@ -412,6 +411,8 @@ export const encodeSymlink = (node, ignoreMetadata = false) => {
       ...encodeMetadata(metadata || BLANK),
       filesize: BigInt(node.content.byteLength),
       blocksizes: [],
+      hashType: 0n,
+      fanout: 0n,
     },
     []
   )
@@ -620,10 +621,10 @@ export const decodeMetadata = data =>
 const encodeMTime = mtime => {
   
   return mtime == null
-    ? undefined
-    : mtime.nsecs !== 0
+    ? { Seconds: 0n, FractionalNanoseconds: 0, $typeName: 'UnixTime' }
+    : mtime.nsecs
     ? { Seconds: mtime.secs, FractionalNanoseconds: mtime.nsecs, $typeName: 'UnixTime' }
-    : { Seconds: mtime.secs, $typeName: 'UnixTime' }
+    : { Seconds: mtime.secs, FractionalNanoseconds: 0, $typeName: 'UnixTime' }
 }
 
 /**
@@ -632,7 +633,7 @@ const encodeMTime = mtime => {
  */
 export const encodeMode = (specifiedMode, defaultMode) => {
   const mode = specifiedMode == null ? undefined : decodeMode(specifiedMode)
-  return mode === defaultMode || mode == null ? undefined : mode
+  return mode === defaultMode || mode == null ? 0 : mode
 }
 
 /**
