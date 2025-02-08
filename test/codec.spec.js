@@ -236,7 +236,7 @@ describe("unixfs-format", () => {
     })
   })
 
-  it.only("empty", () => {
+  it("empty", () => {
     const block = unixfs.encode({
       type: unixfs.NodeType.File,
       layout: "simple",

@@ -175,6 +175,7 @@ export const encodeRaw = content =>
       filesize: BigInt(content.byteLength),
       // @ts-ignore
       blocksizes: EMPTY,
+      fanout: 0n,
     },
     []
   )
