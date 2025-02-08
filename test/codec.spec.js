@@ -3,6 +3,8 @@ import * as unixfs from "../src/codec.js"
 import { assert } from "chai"
 import * as blocks from "./fixtures.js"
 import { describe, it } from 'node:test'
+import { fromBinary } from "@bufbuild/protobuf"
+import { Data_DataType, Data_DataTypeSchema, DataSchema } from "../gen/unixfs_pb.js"
 
 const utf8 = new TextEncoder()
 const MURMUR = 0x22
@@ -234,7 +236,7 @@ describe("unixfs-format", () => {
     })
   })
 
-  it("empty", () => {
+  it.only("empty", () => {
     const block = unixfs.encode({
       type: unixfs.NodeType.File,
       layout: "simple",

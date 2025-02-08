@@ -24,9 +24,6 @@ export const name = "UnixFS"
 const encodePB = (data, links) => {
   Object(globalThis).debug && console.log({ data, links })
 
-  if (data.blocksizes == null) {
-    data.blocksizes = []
-  }
 
   return PB.encode(
     // We run through prepare as links need to be sorted by name which it will
