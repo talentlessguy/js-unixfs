@@ -8,14 +8,14 @@ import type {
   Block as IPLDBlock,
   BlockView as IPLDBlockView
 } from "multiformats"
-import { Data as IData, Data_DataType} from "../gen/unixfs_pb.js"
+import { Data } from "../gen/unixfs.js"
 export type { MultihashHasher, MultibaseEncoder, MultihashDigest, BlockEncoder }
 export * as Layout from "./file/layout/api"
 
-import NodeType = Data_DataType
+import NodeType = Data.DataType
 
 export { NodeType }
-export type { IData, LinkVersion }
+export { Data, LinkVersion }
 
 /**
  * Type representing any UnixFS node.

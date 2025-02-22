@@ -1,9 +1,10 @@
 {
   "name": "gen",
   "version": "1.0.0",
-  "main": "unixfs.js",
   "license": "MIT",
   "devDependencies": {
     "typescript": "^4.8.4"
-  }
+  },
+  "type": "module",
+  "exports": "./unixfs.js"
 }

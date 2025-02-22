@@ -1,8 +1,6 @@
 import * as PB from "@ipld/dag-pb"
 import * as UnixFS from "./unixfs.js"
-import { NodeType } from "./unixfs.js"
-import { DataSchema } from "../gen/unixfs_pb.js"
-import { fromBinary, toBinary } from '@bufbuild/protobuf'
+import { NodeType, Data } from "./unixfs.js"
 
 export * from "./unixfs.js"
 
@@ -18,7 +16,7 @@ export const code = PB.code
 export const name = "UnixFS"
 
 /**
- * @param {UnixFS.IData} data
+ * @param {UnixFS.Data} data
  * @param {ReadonlyArray<UnixFS.PBLink>} links
  */
 const encodePB = (data, links) => {
@@ -29,7 +27,7 @@ const encodePB = (data, links) => {
     // We run through prepare as links need to be sorted by name which it will
     // do.
     PB.prepare({
-      Data: data.Data ? toBinary(DataSchema, data) : undefined,
+      Data: data.Data ? Data.encode(data) : undefined,
       // We can cast to mutable array as we know no mutation occurs there
       Links:
         /** @type {PB.PBLink[]} */ (links),
@@ -169,7 +167,7 @@ export const createDirectoryShard = (entries, bitfield, fanout, hashType) => ({
 export const encodeRaw = content =>
   encodePB(
     {
-      $typeName: 'Data',
+      
       Type: NodeType.Raw,
       Data: content.byteLength > 0 ? content : EMPTY_BUFFER,
       filesize: BigInt(content.byteLength),
@@ -214,14 +212,14 @@ export const encodeFileChunk = content => encodeSimpleFile(content, BLANK)
 export const encodeFileShard = parts =>
   encodePB(
     {
-      $typeName: 'Data',
+      
       Data: EMPTY_BUFFER,
       Type: NodeType.File,
       blocksizes: parts.map(contentByteLength),
       filesize: BigInt(cumulativeContentByteLength(parts)),
       hashType: 0n,
       fanout: 0n,
-      
+      mode: 0,
     },
     parts.map(encodeLink)
   )
@@ -234,7 +232,6 @@ export const encodeFileShard = parts =>
 export const encodeAdvancedFile = (parts, metadata = BLANK) =>
   encodePB(
     {
-      $typeName: 'Data',
       Data: EMPTY_BUFFER,
       Type: NodeType.File,
       blocksizes: parts.map(contentByteLength),
@@ -267,13 +264,13 @@ export const encodeLink = dag => ({
 export const encodeSimpleFile = (content, metadata = BLANK) =>
   encodePB(
     {
-      $typeName: 'Data',
+      
       Type: NodeType.File,
       // adding empty file to both go-ipfs and js-ipfs produces block in
       // which `Data` is omitted but filesize and blocksizes are present.
       // For the sake of hash consistency we do the same.
       Data: content.byteLength > 0 ? content : EMPTY_BUFFER,
-      filesize: content.byteLength === 0 ? undefined : BigInt(content.byteLength),
+      filesize: content.byteLength === 0 ? 0n : BigInt(content.byteLength),
       blocksizes: [],
       ...encodeMetadata(metadata),
       hashType: 0n,
@@ -292,14 +289,13 @@ export const encodeSimpleFile = (content, metadata = BLANK) =>
 export const encodeComplexFile = (content, parts, metadata = BLANK) =>
   encodePB(
     {
-      $typeName:'Data',
       Type: NodeType.File,
       Data: content,
       filesize: BigInt(content.byteLength + cumulativeContentByteLength(parts)),
       blocksizes: parts.map(contentByteLength),
       hashType: 0n,
       fanout: 0n,
-      
+      mode: 0,
     },
     parts.map(encodeLink)
   )
@@ -311,7 +307,7 @@ export const encodeComplexFile = (content, parts, metadata = BLANK) =>
 export const encodeDirectory = node =>
   encodePB(
     {
-      $typeName: 'Data',
+      
       Data: EMPTY_BUFFER,
       Type: node.type,
       blocksizes: [],
@@ -337,7 +333,7 @@ export const encodeHAMTShard = ({
 }) =>
   encodePB(
     {
-      $typeName: 'Data',
+      
       Type: NodeType.HAMTShard,
       Data: bitfield.byteLength > 0 ? bitfield : EMPTY_BUFFER,
       fanout: BigInt(readFanout(fanout)),
@@ -406,7 +402,7 @@ export const encodeSymlink = (node, ignoreMetadata = false) => {
   // @see https://github.com/ipfs/js-ipfs-unixfs/issues/195
   return encodePB(
     {
-      $typeName: 'Data',
+      
       Type: NodeType.Symlink,
       Data: node.content,
       ...encodeMetadata(metadata || BLANK),
@@ -617,15 +613,15 @@ export const decodeMetadata = data =>
 
 /**
  * @param {UnixFS.MTime} mtime
- * @returns {import("../gen/unixfs_pb.js").UnixTime | undefined}
+ * @returns {import("../gen/unixfs.js").UnixTime | undefined}
  */
 const encodeMTime = mtime => {
   
   return mtime == null
-    ? { Seconds: 0n, FractionalNanoseconds: 0, $typeName: 'UnixTime' }
+    ? { seconds: 0n, fractionalNanoseconds: 0 }
     : mtime.nsecs
-    ? { Seconds: mtime.secs, FractionalNanoseconds: mtime.nsecs, $typeName: 'UnixTime' }
-    : { Seconds: mtime.secs, FractionalNanoseconds: 0, $typeName: 'UnixTime' }
+    ? { seconds: mtime.secs, fractionalNanoseconds: mtime.nsecs }
+    : { seconds: mtime.secs, fractionalNanoseconds: 0 }
 }
 
 /**
