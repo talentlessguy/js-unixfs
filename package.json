@@ -20,10 +20,10 @@
     "gen:matrix": "node ./scripts/matrix.js",
     "gen:types": "tsc --build",
     "prepare": "tsc --build",
-    "test:web": "playwright-test test/**/*.spec.js --cov && nyc report",
-    "test:node": "c8 --check-coverage --branches 95 --functions 83 --lines 94 node --test test/**/*.spec.js",
+    "test:web": "playwright-test 'test/**/*.spec.js' --cov && nyc report",
+    "test:node": "c8 --check-coverage --branches 95 --functions 83 --lines 94 node --test 'test/**/*.spec.js'",
     "test": "npm run test:node",
-    "coverage": "c8 --reporter=html node --test test/**/*.spec.js && npm_config_yes=true npx st -d coverage -p 8080",
+    "coverage": "c8 --reporter=html node --test 'test/**/*.spec.js' && npm_config_yes=true npx st -d coverage -p 8080",
     "typecheck": "tsc --build",
     "test:convergence": "node --test test/convergence.js"
   },
