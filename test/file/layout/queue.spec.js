@@ -2,7 +2,7 @@
 import { assert } from "chai"
 import * as Queue from "../../../src/file/layout/queue.js"
 import { shuffle, createLink, createNode } from "./util.js"
-import { describe, it } from "node:test"
+import { describe, it } from "mocha"
 
 describe("layout queue", () => {
   it("empty is linked right away", () => {

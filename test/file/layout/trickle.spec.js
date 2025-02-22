@@ -2,7 +2,7 @@
 import { assert } from "chai"
 import * as Trickle from "../../../src/file/layout/trickle.js"
 import * as Slice from "../../../src/file/chunker/buffer.js"
-import { describe, it } from "node:test"
+import { describe, it } from "mocha"
 
 describe("trickle layout", () => {
   it("empty produces empty leaf node", () => {

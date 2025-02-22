@@ -2,7 +2,7 @@
 import * as unixfs from "../src/codec.js"
 import { assert } from "chai"
 import * as blocks from "./fixtures.js"
-import { describe, it } from 'node:test'
+import { describe, it } from 'mocha'
 
 const utf8 = new TextEncoder()
 const MURMUR = 0x22
@@ -301,8 +301,6 @@ describe("unixfs-format", () => {
         },
       },
     })
-
-    console.log(unixfs.decode(block))
 
     assert.deepEqual(unixfs.decode(block), {
       type: unixfs.NodeType.Symlink,

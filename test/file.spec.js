@@ -8,11 +8,12 @@ import * as Balanced from "../src/file/layout/balanced.js"
 import * as FixedSize from "../src/file/chunker/fixed.js"
 import * as Rabin from "../src/file/chunker/rabin.js"
 import { sha256 } from "multiformats/hashes/sha2"
-import { describe, it } from 'node:test'
+import { describe, it } from 'mocha'
 
 const CHUNK_SIZE = 262144
 describe("test file", () => {
-  it("basic file", {timeout: 30000}, async function () {
+  it("basic file", async function () {
+    this.timeout(30000)
     const content = encodeUTF8("this file does not have much content\n")
     const { readable, writable } = new TransformStream()
     const writer = writable.getWriter()
@@ -142,7 +143,8 @@ describe("test file", () => {
     await writer.close()
   })
 
-  it("chunks with rabin chunker", {timeout: 30000}, async function () {
+  it("chunks with rabin chunker", async function () {
+    this.timeout(30000)
     const content = hashrecur({
       byteLength: CHUNK_SIZE * 2,
     })
@@ -171,7 +173,8 @@ describe("test file", () => {
     assert.deepEqual((await blocks).length, 4)
   })
 
-  it("trickle layout", { timeout: 30000 }, async function () {
+  it("trickle layout", async function (t) {
+    this.timeout(30000)
     const content = hashrecur({
       byteLength: CHUNK_SIZE * 2,
     })
@@ -201,9 +204,10 @@ describe("test file", () => {
       contentByteLength: 524288,
       dagByteLength: 548251,
     })
-  })
+  },)
 
-  it("trickle layout with overflow", { timeout: 30000 }, async function () {
+  it("trickle layout with overflow", async function () {
+    this.timeout(30000)
     const content = hashrecur({
       byteLength: CHUNK_SIZE * 2,
     })
@@ -236,7 +240,8 @@ describe("test file", () => {
     })
   })
 
-  it("trickle with several levels deep", { timeout: 30000 }, async function () {
+  it("trickle with several levels deep", async function () {
+    this.timeout(30000)
     const chunkSize = 128
     const maxLeaves = 4
     const leafCount = 42
