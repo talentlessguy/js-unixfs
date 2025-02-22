@@ -302,6 +302,8 @@ describe("unixfs-format", () => {
       },
     })
 
+    console.log(unixfs.decode(block))
+
     assert.deepEqual(unixfs.decode(block), {
       type: unixfs.NodeType.Symlink,
       content: utf8Encode("file.txt"),

@@ -618,10 +618,10 @@ export const decodeMetadata = data =>
 const encodeMTime = mtime => {
   
   return mtime == null
-    ? { seconds: 0n, fractionalNanoseconds: 0 }
+    ? { Seconds: 0n, FractionalNanoseconds: 0 }
     : mtime.nsecs
-    ? { seconds: mtime.secs, fractionalNanoseconds: mtime.nsecs }
-    : { seconds: mtime.secs, fractionalNanoseconds: 0 }
+    ? { Seconds: mtime.secs, FractionalNanoseconds: mtime.nsecs }
+    : { Seconds: mtime.secs, FractionalNanoseconds: 0 }
 }
 
 /**
