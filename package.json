@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/ipld/js-unixfs",
   "scripts": {
-    "prepare:proto": "protons proto/unixfs.proto -o gen",
+    "prepare:proto": "protons proto/unixfs.proto -o gen && cd gen && tsc",
     "gen:matrix": "node ./scripts/matrix.js",
     "gen:types": "tsc --build",
     "prepare": "tsc --build",

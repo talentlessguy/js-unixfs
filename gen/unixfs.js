@@ -37,7 +37,7 @@ export var Data;
                 if (opts.lengthDelimited !== false) {
                     w.fork();
                 }
-                if (obj.Type != null && __DataTypeValues[obj.Type] !== 0) {
+                if (obj.Type != null) {
                     w.uint32(8);
                     Data.DataType.codec().encode(obj.Type, w);
                 }
@@ -152,32 +152,32 @@ export var UnixTime;
                 if (opts.lengthDelimited !== false) {
                     w.fork();
                 }
-                if ((obj.seconds != null && obj.seconds !== 0n)) {
+                if (obj.Seconds != null) {
                     w.uint32(8);
-                    w.int64(obj.seconds);
+                    w.int64(obj.Seconds);
                 }
-                if ((obj.fractionalNanoseconds != null && obj.fractionalNanoseconds !== 0)) {
+                if ((obj.FractionalNanoseconds != null && obj.FractionalNanoseconds !== 0)) {
                     w.uint32(21);
-                    w.fixed32(obj.fractionalNanoseconds);
+                    w.fixed32(obj.FractionalNanoseconds);
                 }
                 if (opts.lengthDelimited !== false) {
                     w.ldelim();
                 }
             }, (reader, length, opts = {}) => {
                 const obj = {
-                    seconds: 0n,
-                    fractionalNanoseconds: 0
+                    Seconds: 0n,
+                    FractionalNanoseconds: 0
                 };
                 const end = length == null ? reader.len : reader.pos + length;
                 while (reader.pos < end) {
                     const tag = reader.uint32();
                     switch (tag >>> 3) {
                         case 1: {
-                            obj.seconds = reader.int64();
+                            obj.Seconds = reader.int64();
                             break;
                         }
                         case 2: {
-                            obj.fractionalNanoseconds = reader.fixed32();
+                            obj.FractionalNanoseconds = reader.fixed32();
                             break;
                         }
                         default: {
@@ -207,23 +207,23 @@ export var Metadata;
                 if (opts.lengthDelimited !== false) {
                     w.fork();
                 }
-                if ((obj.mimeType != null && obj.mimeType !== '')) {
+                if ((obj.MimeType != null && obj.MimeType !== '')) {
                     w.uint32(10);
-                    w.string(obj.mimeType);
+                    w.string(obj.MimeType);
                 }
                 if (opts.lengthDelimited !== false) {
                     w.ldelim();
                 }
             }, (reader, length, opts = {}) => {
                 const obj = {
-                    mimeType: ''
+                    MimeType: ''
                 };
                 const end = length == null ? reader.len : reader.pos + length;
                 while (reader.pos < end) {
                     const tag = reader.uint32();
                     switch (tag >>> 3) {
                         case 1: {
-                            obj.mimeType = reader.string();
+                            obj.MimeType = reader.string();
                             break;
                         }
                         default: {

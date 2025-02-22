@@ -444,7 +444,7 @@ export const encode = (node, root = true) => {
 export const decode = bytes => {
   const pb = PB.decode(bytes)
   // @ts-expect-error data cannot be undefined
-  const message = fromBinary(DataSchema, pb.Data)
+  const message = Data.decode(pb.Data)
 
   const { Type: type, Data: data, mtime, mode, blocksizes, ...rest } = message
   
